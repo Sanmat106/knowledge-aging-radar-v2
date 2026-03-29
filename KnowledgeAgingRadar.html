@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Knowledge Aging Radar — Project Orion</title>
+<script>
+  // Suppress in-browser Babel transform warning (demo build)
+  (function(){var w=console.warn;console.warn=function(){if(arguments[0]&&String(arguments[0]).indexOf('Babel')>-1)return;w.apply(console,arguments);};})();
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#0a0a0a;color:#fff;font-family:'Inter',system-ui,-apple-system,sans-serif}
+  ::-webkit-scrollbar{width:6px;height:6px}
+  ::-webkit-scrollbar-track{background:#111}
+  ::-webkit-scrollbar-thumb{background:#2a2a2a;border-radius:3px}
+  input::placeholder{color:#444}
+  @keyframes ks-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.65)}}
+  @keyframes ks-fadein{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+/* ── DOCUMENT DATA ───────────────────────────────────────────────── */
+const DOCS = [
+  {
+    id:1, title:"Programme Status Report", type:"Status Report",
+    author:"Priya Sharma", daysAgo:8, authorOnProject:true, staleThreshold:30,
+    content:`PROJECT ORION — PROGRAMME STATUS REPORT
+Period: 9–15 Mar 2026 | Ref: ACC-GBP-SR-047 | Engagement: ACC-GBP-2024-0441
+Author: Priya Sharma, Technical Lead | Reviewer: James Whitfield, Programme Manager
+Distribution: Steering Committee, Programme Board, Client PMO
+Classification: CONFIDENTIAL — ACCENTURE/GLOBALBANK EYES ONLY
+
+━━━ EXECUTIVE SUMMARY ━━━
+Overall programme RAG: AMBER. Four workstreams active. Core Banking (WS-01) and Regulatory Reporting (WS-03) remain GREEN. Digital Onboarding (WS-02) slipped to AMBER — UX sign-off overdue, GlobalBank design panel not convened since 12 Feb. Data Migration (WS-04) re-RAGged AMBER: 23.7% defect rate in GL-CORE v4.1 vs. the 8% assumed at sizing.
+
+Go-Live Target: Q4 2026 — 1 December 2026 (hard backstop 15 Dec per Steering Committee, 18 Nov 2025)
+Revenue Target: £3.8M annually from Year 2 (revised post-descope of Wealth Management Module, Nov 2025)
+Budget: £2.14M of £4.5M spent (47.6%) — £170K underspend vs. plan
+
+━━━ WORKSTREAM SCORECARD ━━━
+WS-01  Core Banking Integration      GREEN  API layer 70%; 31/62 payment endpoints live; perf baseline met (147ms p99)
+WS-02  Digital Onboarding & KYC      AMBER  UX sign-off 8 days overdue; Android SDK 78%; Jumio integration complete
+WS-03  Regulatory Reporting          GREEN  94/172 MiFID II report types automated; CCAR/DFAST signed off
+WS-04  Data Migration                AMBER  GL-CORE defect rate 23.7%; cleanse sprint planned 6 Apr
+
+━━━ RISKS THIS PERIOD ━━━
+R-002  FiServ connector milestone missed (28 Feb) — penalty clause activated; batch fallback under assessment (HIGH)
+R-004  Data quality worse than scoped — +6wk impact estimate; cleanse sprint confirmed April (HIGH)
+R-003  FCA Consumer Duty reporting guidance Q2 2026 — may affect COREP templates (MEDIUM)
+
+━━━ DECISIONS REQUIRED ━━━
+DEC-047-A  FiServ fallback approach  Owner: C. Ashworth + M. Chen  Due: 31 Mar 2026
+DEC-047-B  Data migration scope buffer (+6wk)  Owner: Programme Board  Due: 20 Mar 2026
+
+━━━ TEAM ━━━
+Technical Lead: Priya Sharma | Programme Manager: James Whitfield | BA Lead: Aisha Koroma
+Architecture Lead: Sunita Patel | Security Lead: Tom Briggs`
+  },
+  {
+    id:2, title:"Strategy & Business Case", type:"Business Case",
+    author:"David Okafor", daysAgo:210, authorOnProject:false, staleThreshold:365,
+    content:`PROJECT ORION — STRATEGY & BUSINESS CASE
+Date: September 2025 | Ref: ACC-GBP-BC-001 | Version: 2.1 (Board Approved)
+Author: David Okafor, Technical Lead
+Approved: Claire Ashworth, Programme Director | Michael Chen, GlobalBank CIO
+Classification: CONFIDENTIAL — ACCENTURE/GLOBALBANK EYES ONLY
+
+━━━ STRATEGIC CONTEXT ━━━
+GlobalBank PLC faces sustained margin compression from challenger banks (Monzo, Revolut, Starling) and embedded-finance entrants. Legacy core banking infrastructure (GL-CORE v4.1, deployed 2009) constrains product agility and increases regulatory overhead. Project Orion delivers a next-generation platform to restore competitive positioning and capture digital wealth management and open banking segments.
+
+━━━ FINANCIAL CASE ━━━
+Total Programme Investment:        £4.5M over 24 months
+Projected Revenue Uplift (Yr 2+):  £4.2M annually
+  — Core Banking & Digital:        £2.1M (operational efficiency + new product revenue)
+  — Wealth Management Module:      £1.1M (new AUM from digital wealth journeys)
+  — Regulatory Automation:         £1.0M (avoided compliance cost and fines reduction)
+NPV (5-year, 8% discount rate):    £8.3M  |  IRR: 22%  |  Payback: 28 months
+
+━━━ GO-LIVE TARGET ━━━
+Q3 2026 — September 2026. Aligned to GlobalBank's fiscal year-end cycle and FCA regulatory window. Any slip beyond Q3 2026 requires re-negotiation of the revenue recognition schedule with GlobalBank Finance.
+
+━━━ PROGRAMME SCOPE ━━━
+1. Core Banking Migration — GL-CORE v4.1 to GlobalBank Core v2.0 (Temenos T24)
+2. Digital Onboarding & eKYC — biometric identity verification, AML/KYC rules engine
+3. Wealth Management Module — robo-advisory, ISA/SIPP digital wrappers, AUM dashboard
+4. Regulatory Reporting Automation — MiFID II, COREP, FINREP, CCAR/DFAST
+5. Mobile & Open Banking API Layer — PSD2-compliant, iOS/Android
+
+━━━ KEY ASSUMPTIONS ━━━
+A1. Wealth Management Module in full scope — critical to achieving £4.2M revenue target
+A2. FiServ partnership confirmed and contractually committed
+A3. No material FCA/PRA regulatory change through 2026
+A4. Data migration sizing based on 8% defect rate in GL-CORE source systems
+A5. Technical Lead: David Okafor to lead through programme completion`
+  },
+  {
+    id:3, title:"RAID Log", type:"RAID Log",
+    author:"Aisha Koroma", daysAgo:22, authorOnProject:true, staleThreshold:45,
+    content:`PROJECT ORION — RAID LOG
+Last Updated: 1 March 2026 | Ref: ACC-GBP-RAID-v14 | Owner: Aisha Koroma, BA Lead
+Review Cycle: Fortnightly | Next Review: 15 March 2026
+Classification: CONFIDENTIAL — ACCENTURE/GLOBALBANK EYES ONLY
+
+━━━ RISKS (OPEN) ━━━
+R-001  HIGH    Data Migration Quality — GL-CORE v4.1 defect rate 23.7% vs. 8% scoped. Est. +6wk impact. Mitigation: cleanse sprint 6 Apr. Owner: Yusuf Hassan.
+R-002  HIGH    FiServ Connector Delay — 28 Feb milestone missed. Penalty clause activated (contract clause 14.3). Batch-file fallback under architecture review. Owner: Raj Krishnamurthy.
+R-003  MEDIUM  FCA Consumer Duty guidance Q2 2026 — potential COREP template rework (est. 3wks). Monitoring. Owner: Oliver Marsh.
+R-005  LOW     GlobalBank UAT Resourcing — 8 FTE requirement may not be met. Owner: Gemma Carr. Escalation: Michael Chen.
+
+━━━ ASSUMPTIONS (ACTIVE) ━━━
+A-001  CONFIRMED  Wealth Management Module descoped — Programme Board approved November 2025. Revenue target revised from £4.2M to £3.8M. Francesca DiMaggio released from programme 30 Nov 2025.
+A-002  CONFIRMED  Go-live revised to Q4 2026 (target 1 Dec 2026; backstop 15 Dec). Decision: Programme Board November 2025. Supersedes Q3 2026 target in Business Case (ref: ACC-GBP-BC-001).
+A-003  CONFIRMED  FiServ batch fallback to be scoped if no confirmed delivery date by 31 Mar 2026.
+
+━━━ ISSUES ━━━
+I-001  CLOSED  David Okafor (Technical Lead) departed 15 January 2026. Replaced by Priya Sharma effective 15 Jan 2026. Formal announcement by C. Ashworth to steering committee 16 Jan 2026.
+I-002  OPEN    Org Chart (ACC-GBP-ORG-v4, Dec 2025) still lists David Okafor as Technical Lead and Francesca DiMaggio as Wealth Management WS Lead. PMO to update. Owner: James Whitfield. Due: 31 Mar 2026.
+I-003  OPEN    Programme Plan (ACC-GBP-PLAN-v3.1, Feb 2026) shows September 2026 go-live and David Okafor as resource. Re-baselining required. Owner: James Whitfield. Due: 15 Apr 2026.
+I-004  OPEN    FiServ integration spec v2.3 now out of date. Owner: Raj Krishnamurthy. Due: 30 Mar 2026.
+I-005  OPEN    Technical Architecture Document (ACC-GBP-TAD-v2, Nov 2025) references Wealth Management Module components still in scope. Update required. Owner: Sunita Patel. Due: 31 Mar 2026.
+
+━━━ DECISIONS ━━━
+D-001  Wealth Mgmt Module descoped | Nov 2025 | Programme Board
+D-002  Go-live revised Q4 2026 | Nov 2025 | Programme Board
+D-003  Priya Sharma appointed Technical Lead | Jan 2026 | Claire Ashworth
+D-004  FiServ penalty clause activated | Feb 2026 | Claire Ashworth
+D-005  Data cleanse sprint approved | Feb 2026 | Programme Board`
+  },
+  {
+    id:4, title:"Org Chart", type:"Org Chart",
+    author:"James Whitfield", daysAgo:115, authorOnProject:true, staleThreshold:90,
+    content:`PROJECT ORION — ORGANISATIONAL CHART
+Date: 1 December 2025 | Ref: ACC-GBP-ORG-v4
+Author: James Whitfield, Programme Manager
+Next Scheduled Review: February 2026
+Classification: CONFIDENTIAL — ACCENTURE/GLOBALBANK EYES ONLY
+
+━━━ PROGRAMME GOVERNANCE ━━━
+GlobalBank Executive Sponsor:   Sir Robert Hargreaves (Group CEO)
+Accenture Programme Director:   Claire Ashworth (Partner, Financial Services)
+GlobalBank Programme Director:  Michael Chen (Chief Information Officer)
+Steering Committee:             Quarterly — next 25 March 2026
+
+━━━ ACCENTURE CORE TEAM ━━━
+Technical Lead:              David Okafor
+Programme Manager:           James Whitfield
+Business Analyst Lead:       Aisha Koroma
+Architecture Lead:           Sunita Patel
+Security & Compliance Lead:  Tom Briggs
+DevOps & Cloud Lead:         Priya Sharma
+Change & Adoption Lead:      Chloe Brennan
+Commercial Manager:          Haruto Yamada
+
+━━━ WORKSTREAM LEADS ━━━
+WS-01  Core Banking:          Raj Krishnamurthy (Accenture Senior Manager)
+WS-02  Digital Onboarding:    Mei Lin (Accenture Manager)
+WS-03  Wealth Management:     Francesca DiMaggio (Accenture Manager)
+WS-04  Regulatory Reporting:  Oliver Marsh (Accenture Senior Consultant)
+WS-05  Data Migration:        Yusuf Hassan (Accenture Manager)
+
+━━━ GLOBALBANK TEAM ━━━
+IT Director: Sarah Hendricks | Operations: Nick Forsythe | Risk & Compliance: Patricia Osei
+Change Management: Gemma Carr | UAT Lead: [VACANT — confirm Q1 2026]
+
+━━━ NOTES ━━━
+All roles confirmed as of 1 December 2025. Next review: February 2026.
+Headcount: 14 Accenture FTEs, 6 GlobalBank, 3 key contractors.`
+  },
+  {
+    id:5, title:"Programme Plan", type:"Project Plan",
+    author:"James Whitfield", daysAgo:48, authorOnProject:true, staleThreshold:60,
+    content:`PROJECT ORION — PROGRAMME PLAN (BASELINED)
+Date: 3 February 2026 | Ref: ACC-GBP-PLAN-v3.1
+Author: James Whitfield, Programme Manager
+Status: BASELINED — change control required for amendments
+Classification: CONFIDENTIAL — ACCENTURE/GLOBALBANK EYES ONLY
+
+━━━ PHASE OVERVIEW ━━━
+Phase 1  Foundation        Oct–Dec 2025   COMPLETE
+Phase 2  Build             Jan–Jun 2026   IN PROGRESS
+Phase 3  SIT               May–Jul 2026   NOT STARTED
+Phase 4  UAT               Jul–Aug 2026   NOT STARTED
+Phase 5  Deploy & Cutover  Sep 2026       NOT STARTED
+Hypercare                  Sep–Nov 2026   NOT STARTED
+
+━━━ KEY MILESTONES ━━━
+M-01  Architecture sign-off          Dec 2025        COMPLETE
+M-02  All API endpoints complete      30 Apr 2026     ON TRACK
+M-03  SIT Entry                       2 May 2026      ON TRACK
+M-04  UAT Entry                       1 Jul 2026      ON TRACK
+M-05  UAT Sign-off                    31 Aug 2026     ON TRACK
+M-06  Go-Live                         Sep 2026 (Q3)   TARGET
+M-07  Hypercare End / BAU             30 Nov 2026     PLANNED
+
+━━━ CRITICAL PATH ━━━
+API Layer → SIT → UAT → Performance Test → Go-Live (Sep 2026)
+FiServ connector on critical path — delay >4 wks threatens September go-live.
+
+━━━ RESOURCE PLAN ━━━
+Technical Lead:    David Okafor — through programme completion (Nov 2026)
+Programme Manager: James Whitfield — through hypercare (Nov 2026)
+BA Lead:           Aisha Koroma — through UAT (Aug 2026), then 50% hypercare
+Architecture Lead: Sunita Patel — through SIT exit (Jun 2026)
+
+━━━ ASSUMPTIONS ━━━
+BA-01  No further scope changes post February 2026 baseline
+BA-02  FiServ delivery confirmed by 30 June 2026
+BA-03  GlobalBank UAT resource pool (min 8 FTE) from 1 July 2026
+BA-04  Data migration cleanse complete by 30 May 2026
+
+━━━ CHANGE LOG ━━━
+v3.0  Jan 2026  Initial post-mobilisation baseline
+v3.1  Feb 2026  Resource actuals updated; FiServ risk flagged`
+  },
+  {
+    id:6, title:"Technical Architecture Document", type:"Architecture Doc",
+    author:"Sunita Patel", daysAgo:138, authorOnProject:true, staleThreshold:90,
+    content:`PROJECT ORION — TECHNICAL ARCHITECTURE DOCUMENT
+Date: 5 November 2025 | Ref: ACC-GBP-TAD-v2 | Version: 2.0
+Author: Sunita Patel, Architecture Lead
+Reviewed: David Okafor, Technical Lead | Tom Briggs, Security Lead
+Status: APPROVED — Change control required for amendments
+Classification: CONFIDENTIAL — ACCENTURE/GLOBALBANK EYES ONLY
+
+━━━ ARCHITECTURE OVERVIEW ━━━
+Project Orion adopts a microservices architecture deployed on Microsoft Azure (UK South region) with active-active failover to UK West. Core banking processing is handled by Temenos T24 R21 with a custom API orchestration layer (Node.js / Express) providing RESTful interfaces for all consumer-facing and internal integrations.
+
+━━━ COMPONENT INVENTORY ━━━
+Core Banking Engine:       Temenos T24 R21 — account management, payments, lending
+API Orchestration Layer:   Node.js 18 LTS / Express — REST + GraphQL gateway
+Digital Onboarding:        React 18 SPA + Jumio NetVerify for biometric KYC
+Wealth Management Module:  BlackRock Aladdin Wealth API integration + custom portfolio dashboard
+Regulatory Reporting:      Custom ETL pipeline (Python 3.11) + Tableau Server 2024.1
+Data Migration:            AWS DMS + custom transformation scripts (Python)
+Identity & Access:         Azure AD B2C + Okta (workforce IAM)
+Infrastructure:            Azure AKS (Kubernetes 1.28), Terraform IaC, GitHub Actions CI/CD
+
+━━━ WEALTH MANAGEMENT MODULE — TECHNICAL SCOPE ━━━
+The Wealth Management Module (in scope per Business Case ACC-GBP-BC-001) comprises:
+- BlackRock Aladdin Wealth API integration for portfolio analytics
+- Custom ISA/SIPP digital wrapper UI (React components, 14 screens)
+- Robo-advisory decision engine (Python ML service, Azure ML)
+- AUM dashboard for relationship managers (Tableau embedded)
+Technical Lead for WM components: David Okafor (architecture sign-off authority)
+
+━━━ SECURITY ARCHITECTURE ━━━
+Data classification: RESTRICTED (customer PII) and CONFIDENTIAL (financial data)
+Encryption: AES-256 at rest, TLS 1.3 in transit
+Penetration testing: Mandatory pre-go-live (scheduled Aug 2026)
+FCA DSAR compliance: Data lineage tracked via Collibra Data Catalog
+OWASP Top 10 review: Completed Nov 2025 — 0 Critical, 2 High findings remediated
+
+━━━ INFRASTRUCTURE SIZING ━━━
+Production: 3x AKS node pools (Standard_D8s_v3), autoscale 3–12 nodes
+Non-prod: Shared AKS cluster (Dev, SIT, UAT namespaces)
+Go-live capacity target: 50,000 concurrent sessions, 2,000 TPS payments rail
+DR RTO: 4 hours | RPO: 15 minutes
+
+━━━ OPEN ARCHITECTURE DECISIONS ━━━
+AD-001  FiServ middleware connector vs. direct ISO 20022 — pending vendor confirmation (due 31 Mar 2026)
+AD-002  Wealth Management AUM data residency — FCA CASS rules compliance review in progress`
+  },
+  {
+    id:7, title:"Steering Committee Minutes", type:"Meeting Minutes",
+    author:"Claire Ashworth", daysAgo:35, authorOnProject:true, staleThreshold:30,
+    content:`PROJECT ORION — STEERING COMMITTEE MINUTES
+Date: 16 February 2026 | Ref: ACC-GBP-SC-MIN-009
+Chair: Claire Ashworth (Accenture Programme Director)
+Client Chair: Michael Chen (GlobalBank CIO)
+Attendees: Sir Robert Hargreaves, Patricia Osei, Sarah Hendricks (GlobalBank); James Whitfield, Priya Sharma, Haruto Yamada (Accenture)
+Apologies: Nick Forsythe (GlobalBank)
+Classification: CONFIDENTIAL — ACCENTURE/GLOBALBANK EYES ONLY
+
+━━━ 1. PROGRAMME STATUS UPDATE ━━━
+Priya Sharma presented the period-14 status report. Overall RAG remains AMBER. Steering noted the data migration defect rate (23.7%) as a material risk and requested a formal mitigation plan by 20 March 2026. Go-live target of Q4 2026 (December) reconfirmed — steering committee noted this is the third reconfirmation since the November 2025 scope rebalancing.
+
+━━━ 2. FISRV VENDOR ESCALATION ━━━
+Claire Ashworth confirmed FiServ penalty clause activated. FiServ UK MD (Karl Bergström) has been invited to join a bilateral call on 28 February 2026. Architecture team to present batch-file fallback option at next steering if no FiServ commitment received by 31 March. Budget impact of fallback estimated at +£85K (Haruto Yamada confirmed contingency headroom exists).
+
+━━━ 3. REVENUE TARGET CLARIFICATION ━━━
+Sir Robert Hargreaves requested explicit confirmation of the revised revenue target following the November 2025 descope of the Wealth Management Module. Claire Ashworth confirmed: revenue target is £3.8M annually from Year 2, revised from the original £4.2M in the Business Case. GlobalBank Finance have updated their FY27 forecast accordingly.
+
+━━━ 4. TECHNICAL LEAD CONFIRMATION ━━━
+Michael Chen formally noted for the record that Priya Sharma is the current Technical Lead, replacing David Okafor who left the programme in January 2026. Steering committee requested that the Org Chart and Programme Plan be updated to reflect this before the next steering session (25 March 2026).
+
+━━━ 5. ACTIONS ━━━
+SC-009-A  Data migration mitigation plan  Owner: Priya Sharma  Due: 20 Mar 2026
+SC-009-B  FiServ bilateral call  Owner: Claire Ashworth  Due: 28 Feb 2026
+SC-009-C  Update Org Chart + Programme Plan  Owner: James Whitfield  Due: 25 Mar 2026
+SC-009-D  Confirm GlobalBank UAT resourcing  Owner: Michael Chen  Due: 31 Mar 2026
+
+━━━ NEXT MEETING ━━━
+25 March 2026, 09:00–11:00 GMT | GlobalBank HQ, Canary Wharf, London EC14 | Chair: Claire Ashworth`
+  },
+  {
+    id:8, title:"Change Management Plan", type:"Change Mgmt Plan",
+    author:"Chloe Brennan", daysAgo:142, authorOnProject:true, staleThreshold:90,
+    content:`PROJECT ORION — CHANGE MANAGEMENT & ADOPTION PLAN
+Date: 2 November 2025 | Ref: ACC-GBP-CMP-v1
+Author: Chloe Brennan, Change & Adoption Lead
+Reviewed: Claire Ashworth, Programme Director | Gemma Carr (GlobalBank)
+Classification: CONFIDENTIAL — ACCENTURE/GLOBALBANK EYES ONLY
+
+━━━ CHANGE VISION ━━━
+Project Orion represents the most significant operational transformation at GlobalBank PLC in 15 years, affecting approximately 2,400 employees across retail banking, wealth management, compliance, and operations. The Change Management Plan ensures structured readiness assessment, targeted training, and sustained adoption to realise the £4.2M revenue target from Year 2.
+
+━━━ IMPACTED POPULATIONS ━━━
+Retail Banking Staff:       ~1,100 FTEs — new digital onboarding workflows, updated CRM integration
+Wealth Management Advisors: ~180 FTEs — new Aladdin Wealth platform, robo-advisory tools, portfolio dashboard
+Compliance & Regulatory:    ~95 FTEs — new automated reporting workflows (MiFID II, COREP, FINREP)
+IT Operations:              ~65 FTEs — new Azure/AKS infrastructure, Temenos T24 R21 support model
+Senior Leadership:          ~40 Executives — executive dashboards, KPI reporting changes
+
+━━━ CHANGE TIMELINE ━━━
+Phase 1  Awareness & Readiness Assessment  Nov 2025 – Feb 2026  IN PROGRESS
+Phase 2  Training Design & Material Build  Feb – May 2026       NOT STARTED
+Phase 3  Training Delivery (UAT parallel)  Jun – Aug 2026       NOT STARTED
+Phase 4  Go-Live Readiness & Hypercare     Sep – Nov 2026       NOT STARTED
+Target Go-Live for Change Readiness:       Q3 2026 (September 2026)
+
+━━━ TRAINING APPROACH ━━━
+Delivery: Blended learning — 40% eLearning (Workday LMS), 60% instructor-led workshops
+Wealth Management track: 3-day Aladdin Wealth certification programme (external provider: Broadridge)
+Compliance track: 2-day MiFID II/COREP reporting workflow training
+Retail Banking track: Half-day digital onboarding system simulation
+Change Champion Network: 45 nominated champions across GlobalBank business units
+
+━━━ REVENUE ENABLEMENT DEPENDENCY ━━━
+The £4.2M revenue target is predicated on full adoption of the Wealth Management Module by GlobalBank's 180 wealth advisors. Training for this group must complete no later than 4 weeks before go-live to allow practice time. Failure to achieve 80% training completion will trigger a formal revenue risk flag to the Programme Board.
+
+━━━ RISKS ━━━
+CMP-R-001  GlobalBank change management team under-resourced — Gemma Carr flagged 3 of 5 Change Manager roles unfilled (HIGH)
+CMP-R-002  Wealth advisor resistance to robo-advisory tools — mitigation: early champion engagement, co-design sessions (MEDIUM)
+CMP-R-003  Compressed training window if go-live slips — monitor programme plan milestone M-06 (MEDIUM)`
+  },
+  {
+    id:9, title:"Financial Tracking Report", type:"Financial Report",
+    author:"Haruto Yamada", daysAgo:12, authorOnProject:true, staleThreshold:30,
+    content:`PROJECT ORION — FINANCIAL TRACKING REPORT
+Period: March 2026 (Week 22) | Ref: ACC-GBP-FIN-022
+Author: Haruto Yamada, Commercial Manager
+Reviewer: Claire Ashworth, Programme Director
+Classification: CONFIDENTIAL — ACCENTURE/GLOBALBANK EYES ONLY
+
+━━━ BUDGET SUMMARY ━━━
+Total Approved Budget:     £4,500,000
+Spent to Date (W22):       £2,143,200  (47.6% of total)
+Forecast to Complete:      £2,284,000
+Total Forecast Cost:       £4,427,200
+Forecast Underspend:       £72,800  (1.6%)
+
+Accenture Fees (W22):      £1,382,000  (64.5% of Accenture total)
+Technology & Licences:     £486,400   (58.1% of tech budget)
+GlobalBank Recharges:      £274,800   (41.2% of recharged budget)
+
+━━━ MONTHLY BURN RATE ━━━
+Oct 2025:   £142,000  (mobilisation)
+Nov 2025:   £198,000
+Dec 2025:   £221,000
+Jan 2026:   £243,000
+Feb 2026:   £259,000 (FiServ penalty clause costs: £18,400 accrued)
+Mar 2026:   £224,000 (forecast, week 2 actuals only)
+
+━━━ BUDGET VARIANCES ━━━
+Positive: David Okafor departure (Jan 2026) created a fee saving of ~£28,000/month vs. plan; Priya Sharma backfill at lower rate. Net monthly saving: £11,200. Cumulative saving (Jan–Mar): £22,400.
+Negative: FiServ penalty clause administration and legal costs: £18,400 to date.
+Negative: Data migration cleanse sprint (approved Feb 2026): £95,000 additional budget approved; not yet drawn.
+Neutral: Wealth Management Module descope (Nov 2025) removed £340,000 of forecast external costs but also removed £1.1M of the original £4.2M revenue uplift from scope. Revised revenue target: £3.8M.
+
+━━━ CONTINGENCY POSITION ━━━
+Approved contingency:      £225,000 (5% of total budget)
+Drawn to date:             £0
+Available:                 £225,000
+Note: FiServ batch fallback (if required) estimated at +£85,000 — within available contingency.
+
+━━━ REVENUE FORECAST ━━━
+Original Business Case revenue target:  £4.2M annually from Year 2
+Revised post-descope revenue target:    £3.8M annually from Year 2
+Wealth Management descoped revenue:     £1.1M removed from forecast (Nov 2025 board decision)
+GlobalBank Finance FY27 forecast updated to reflect £3.8M target (confirmed SC-009, Feb 2026)`
+  },
+  {
+    id:10, title:"Data Migration Strategy", type:"Migration Strategy",
+    author:"Yusuf Hassan", daysAgo:94, authorOnProject:true, staleThreshold:60,
+    content:`PROJECT ORION — DATA MIGRATION STRATEGY
+Date: 18 December 2025 | Ref: ACC-GBP-DMS-v1.2
+Author: Yusuf Hassan, Data Migration Lead
+Reviewed: Sunita Patel (Architecture Lead) | David Okafor (Technical Lead)
+Classification: CONFIDENTIAL — ACCENTURE/GLOBALBANK EYES ONLY
+
+━━━ MIGRATION SCOPE ━━━
+Source Systems:
+  GL-CORE v4.1     — Core banking ledger: 4.2M customer accounts, 18 years of transactions
+  CUST-DB-PROD     — Customer master data: 3.8M records, product holdings, relationship data
+  WM-LEGACY-DB     — Wealth management portfolio data: 42,000 AUM accounts (Wealth Mgmt Module in scope)
+  REG-ARCH-2008    — Regulatory archive: 8 years historical reporting data
+Target System:     GlobalBank Core v2.0 (Temenos T24 R21) + new data warehouse (Azure Synapse)
+
+━━━ MIGRATION APPROACH ━━━
+Strategy: Big-bang cutover with parallel run (4 weeks)
+Cutover Window: Weekend of 5–6 September 2026 (Friday close to Monday open)
+Target Go-Live: Monday 7 September 2026 — Q3 2026
+Rollback Trigger: >500 data reconciliation errors in first 2 hours post-cutover
+
+━━━ QUALITY ASSUMPTIONS (AT STRATEGY SIGN-OFF) ━━━
+GL-CORE v4.1 data quality assumption:    8% defect rate (records requiring remediation)
+CUST-DB-PROD null rate assumption:       3% on mandatory fields
+WM-LEGACY-DB quality assumption:         2% defect rate (clean data, recent system)
+Remediation sprint sizing:               3 weeks (based on 8% GL-CORE assumption)
+
+━━━ MOCK MIGRATION SCHEDULE ━━━
+Mock Run #1  30 April 2026   Full extract, transform, load to UAT environment
+Mock Run #2  31 May 2026     Post-cleanse data quality validation run
+Mock Run #3  31 July 2026    Final dress rehearsal — full production simulation
+Go-Live      Sep 2026        Production cutover
+
+━━━ RISKS AT STRATEGY SIGN-OFF ━━━
+MIG-R-001  Data quality worse than 8% assumption — would extend cleanse sprint (now confirmed: actual rate 23.7%, RAID R-001)
+MIG-R-002  WM-LEGACY-DB migration dependency on Wealth Management Module scope — if descoped, WM migration work is wasted
+MIG-R-003  GL-CORE v4.1 access windows restricted by GlobalBank ops — night-only extract windows limit migration velocity
+
+━━━ TECHNICAL LEAD SIGN-OFF ━━━
+This strategy document was reviewed and approved by David Okafor (Technical Lead) on 18 December 2025.
+Any amendments to migration scope, approach or timeline require Technical Lead re-approval.`
+  }
+];
+
+/* ── SCORING ─────────────────────────────────────────────────────── */
+function calcScore(doc){
+  const raw = Math.max(0, 100 - (doc.daysAgo / doc.staleThreshold) * 100);
+  return Math.max(0, Math.round(raw - (doc.authorOnProject ? 0 : 15)));
+}
+function calcRag(s){ return s >= 60 ? "green" : s >= 30 ? "amber" : "red"; }
+const scored = DOCS.map(d => ({ ...d, score: calcScore(d), rag: calcRag(calcScore(d)) }));
+
+/* ── PALETTE ─────────────────────────────────────────────────────── */
+const C = {
+  bg:"#0a0a0a", s1:"#111111", s2:"#181818", b1:"#1e1e1e", b2:"#2a2a2a",
+  p:"#a100ff", pd:"rgba(161,0,255,0.12)", pb:"rgba(161,0,255,0.28)",
+  w:"#ffffff", m:"#888888", d:"#555555", vd:"#2e2e2e",
+  gr:"#22c55e", grd:"rgba(34,197,94,0.12)",
+  am:"#f59e0b", amd:"rgba(245,158,11,0.12)",
+  re:"#ef4444", red:"rgba(239,68,68,0.12)"
+};
+const RAG = {
+  green:{ fg:C.gr, bg:C.grd, lbl:"HEALTHY" },
+  amber:{ fg:C.am, bg:C.amd, lbl:"STALE"   },
+  red:  { fg:C.re, bg:C.red, lbl:"CRITICAL" }
+};
+const SEV = {
+  CRITICAL:{ fg:C.re, bg:C.red },
+  HIGH:    { fg:C.am, bg:C.amd },
+  MEDIUM:  { fg:C.m,  bg:"rgba(136,136,136,0.1)" }
+};
+
+/* ── API ─────────────────────────────────────────────────────────── */
+async function callAI(apiKey, prompt, maxTokens=4096){
+  const r = await fetch("https://api.anthropic.com/v1/messages",{
+    method:"POST",
+    headers:{"Content-Type":"application/json","x-api-key":apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-calls":"true"},
+    body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:maxTokens,messages:[{role:"user",content:prompt}]})
+  });
+  if(!r.ok){const e=await r.json().catch(()=>({})); throw new Error(e.error?.message||`API error ${r.status}`);}
+  return (await r.json()).content[0].text.trim();
+}
+
+async function getContradictions(apiKey){
+  const docs = scored.map(d=>`=== ${d.title} (${d.type}, ${d.daysAgo} days old, author ${d.authorOnProject?"ACTIVE":"LEFT PROJECT"}) ===\n${d.content}`).join("\n\n");
+  const text = await callAI(apiKey,`You are an expert document analyst for Accenture consulting engagement "Project Orion" (client: GlobalBank PLC).
+Analyse these ${scored.length} project documents and identify ALL explicit factual contradictions. Focus on: go-live dates, revenue targets, personnel/roles, scope items, budget figures.
+Trust hierarchy: Status Reports > Meeting Minutes > RAID Logs > Financial Reports > Project Plans > Architecture Docs > Strategy Decks > Business Cases > Change Plans > Migration Strategies.
+For people/roles: most recently dated document wins. RAID Log and Meeting Minutes entries explicitly recording a change override older docs.
+Return ONLY a valid JSON array (no markdown):
+[{"topic":"short name","claimA":{"document":"exact title","claim":"verbatim claim","age":"X days old"},"claimB":{"document":"exact title","claim":"verbatim claim","age":"X days old"},"trustedDocument":"exact title","trustReason":"one sentence","recommendedFix":"specific action","severity":"CRITICAL or HIGH or MEDIUM"}]
+DOCUMENTS:\n${docs}`);
+  const m=text.match(/\[[\s\S]*\]/);
+  if(!m) throw new Error("Could not parse AI response as JSON.");
+  return JSON.parse(m[0]);
+}
+
+async function getNarrative(apiKey,contradictions){
+  return callAI(apiKey,`You are a senior Accenture Partner writing a 3-sentence executive briefing for the Programme Director of Project Orion (GlobalBank PLC). ${contradictions.length} contradictions were found across ${scored.length} programme documents. Name the most critical issues specifically, state the governance risk they create, and give the single most urgent recommended action. Professional consulting tone. No bullet points.\n\nContradictions: ${JSON.stringify(contradictions)}`,500);
+}
+
+/* ── SHARED ──────────────────────────────────────────────────────── */
+const STEPS=["Initialising document index…","Extracting factual claims…","Computing freshness scores…","Running AI contradiction engine…","Applying trust hierarchy…","Generating executive summary…","Compiling final report…"];
+
+function Nav({right}){
+  return <nav style={{borderBottom:`1px solid ${C.b1}`,padding:"0 2rem",height:56,display:"flex",alignItems:"center",justifyContent:"space-between",position:"sticky",top:0,background:C.bg,zIndex:100}}>
+    <div style={{display:"flex",alignItems:"center",gap:10}}>
+      <div style={{width:10,height:10,borderRadius:"50%",background:C.p}}/>
+      <span style={{fontSize:13,fontWeight:700,letterSpacing:"0.1em",textTransform:"uppercase"}}>Accenture</span>
+    </div>
+    <span style={{fontSize:11,letterSpacing:"0.15em",textTransform:"uppercase",color:C.d}}>Knowledge Aging Radar</span>
+    <div style={{fontSize:11}}>{right}</div>
+  </nav>;
+}
+function Lbl({children,color=C.d}){return <span style={{fontSize:10,fontWeight:700,letterSpacing:"0.16em",textTransform:"uppercase",color}}>{children}</span>;}
+function Bdg({text,fg,bg}){return <span style={{fontSize:10,fontWeight:700,letterSpacing:"0.1em",padding:"3px 9px",borderRadius:4,color:fg,background:bg,border:`1px solid ${fg}40`,whiteSpace:"nowrap"}}>{text}</span>;}
+
+/* ── DOCUMENT PREVIEW MODAL ──────────────────────────────────────── */
+function DocModal({doc, onClose}){
+  const r = RAG[doc.rag];
+  useEffect(()=>{
+    const handler = e => { if(e.key==="Escape") onClose(); };
+    window.addEventListener("keydown", handler);
+    return ()=>window.removeEventListener("keydown", handler);
+  },[]);
+  return (
+    <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.85)",zIndex:999,display:"flex",alignItems:"center",justifyContent:"center",padding:"2rem",backdropFilter:"blur(4px)"}}>
+      <div onClick={e=>e.stopPropagation()} style={{background:C.s1,border:`1px solid ${C.b2}`,borderRadius:12,width:"100%",maxWidth:760,maxHeight:"85vh",display:"flex",flexDirection:"column",animation:"ks-fadein 0.2s ease"}}>
+        {/* Modal header */}
+        <div style={{padding:"22px 28px 20px",borderBottom:`1px solid ${C.b1}`,display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:16,flexShrink:0}}>
+          <div>
+            <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:8}}>
+              <Lbl color={C.p}>{doc.type}</Lbl>
+              <Bdg text={r.lbl} fg={r.fg} bg={r.bg}/>
+              {!doc.authorOnProject && <Bdg text="AUTHOR LEFT" fg={C.am} bg={C.amd}/>}
+            </div>
+            <div style={{fontSize:18,fontWeight:700,letterSpacing:"-0.02em",marginBottom:4}}>{doc.title}</div>
+            <div style={{fontSize:13,color:C.m}}>{doc.author} · {doc.daysAgo} days ago · Freshness score: <span style={{color:r.fg,fontWeight:700}}>{doc.score}/100</span></div>
+          </div>
+          <button onClick={onClose} style={{background:"transparent",border:`1px solid ${C.b2}`,color:C.m,width:32,height:32,borderRadius:6,cursor:"pointer",fontSize:16,flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
+        </div>
+        {/* Freshness bar */}
+        <div style={{padding:"12px 28px",borderBottom:`1px solid ${C.b1}`,flexShrink:0}}>
+          <div style={{display:"flex",alignItems:"center",gap:12}}>
+            <Lbl>Freshness</Lbl>
+            <div style={{flex:1,height:3,background:C.vd,borderRadius:2,overflow:"hidden"}}>
+              <div style={{height:"100%",width:`${doc.score}%`,background:r.fg,borderRadius:2}}/>
+            </div>
+            <span style={{fontSize:11,color:C.d,whiteSpace:"nowrap"}}>Stale after {doc.staleThreshold} days{!doc.authorOnProject?" · −15 author penalty":""}</span>
+          </div>
+        </div>
+        {/* Document content */}
+        <div style={{padding:"24px 28px",overflowY:"auto",flex:1}}>
+          <pre style={{fontSize:12,color:"#cccccc",lineHeight:1.8,whiteSpace:"pre-wrap",fontFamily:"'SF Mono','Fira Code','Consolas',monospace"}}>{doc.content}</pre>
+        </div>
+        {/* Footer */}
+        <div style={{padding:"14px 28px",borderTop:`1px solid ${C.b1}`,flexShrink:0,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <span style={{fontSize:11,color:C.d}}>Press Esc to close</span>
+          <button onClick={onClose} style={{background:"transparent",border:`1px solid ${C.b2}`,color:C.m,padding:"6px 16px",borderRadius:6,fontSize:12,cursor:"pointer"}}>Close</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── LANDING ─────────────────────────────────────────────────────── */
+function Landing({apiKey,setApiKey,onRun,error}){
+  const [preview,setPreview]=useState(null);
+  return (
+    <div style={{background:C.bg,minHeight:"100vh",color:C.w}}>
+      {preview && <DocModal doc={preview} onClose={()=>setPreview(null)}/>}
+      <Nav right={<span style={{color:C.d}}>Project Orion · GlobalBank PLC</span>}/>
+
+      {/* Hero */}
+      <div style={{maxWidth:960,margin:"0 auto",padding:"72px 2rem 52px"}}>
+        <Lbl color={C.p}>Internal Tool · Consulting Intelligence</Lbl>
+        <h1 style={{fontSize:"clamp(2.2rem,5.5vw,3.7rem)",fontWeight:900,lineHeight:1.04,letterSpacing:"-0.035em",margin:"14px 0 20px"}}>
+          Know which documents<br/><span style={{color:C.p}}>you can trust.</span>
+        </h1>
+        <p style={{fontSize:15,color:C.m,maxWidth:540,lineHeight:1.7}}>
+          Real-time freshness scoring and AI-powered contradiction detection across your programme document set.
+          Engagement: <strong style={{color:"#ccc"}}>Project Orion</strong> · Client: <strong style={{color:"#ccc"}}>GlobalBank PLC</strong>.
+        </p>
+      </div>
+
+      {/* Document tiles */}
+      <div style={{maxWidth:960,margin:"0 auto",padding:"0 2rem 52px"}}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14}}>
+          <Lbl>Document Inventory</Lbl>
+          <Lbl color={C.d}>{scored.length} documents · click any tile to preview</Lbl>
+        </div>
+        <div style={{height:1,background:C.b1,marginBottom:18}}/>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(270px,1fr))",gap:12}}>
+          {scored.map(doc=>{
+            const r=RAG[doc.rag];
+            return (
+              <div key={doc.id} onClick={()=>setPreview(doc)}
+                style={{background:C.s1,border:`1px solid ${C.b1}`,borderRadius:8,padding:20,position:"relative",overflow:"hidden",cursor:"pointer",transition:"border-color 0.15s,transform 0.15s"}}
+                onMouseOver={e=>{e.currentTarget.style.borderColor=C.b2;e.currentTarget.style.transform="translateY(-1px)";}}
+                onMouseOut={e=>{e.currentTarget.style.borderColor=C.b1;e.currentTarget.style.transform="translateY(0)";}}>
+                <div style={{position:"absolute",top:0,left:0,right:0,height:2,background:r.fg}}/>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10}}>
+                  <Lbl>{doc.type}</Lbl>
+                  <span style={{fontSize:14,fontWeight:800,color:r.fg,background:r.bg,padding:"2px 10px",borderRadius:4,border:`1px solid ${r.fg}40`}}>{doc.score}</span>
+                </div>
+                <div style={{fontSize:14,fontWeight:700,marginBottom:5,lineHeight:1.3}}>{doc.title}</div>
+                <div style={{fontSize:12,color:C.m}}>{doc.author}</div>
+                <div style={{fontSize:11,color:C.d,marginTop:3}}>{doc.daysAgo} days ago · threshold {doc.staleThreshold}d</div>
+                <div style={{display:"flex",gap:6,marginTop:13,flexWrap:"wrap"}}>
+                  <Bdg text={r.lbl} fg={r.fg} bg={r.bg}/>
+                  {!doc.authorOnProject&&<Bdg text="AUTHOR LEFT" fg={C.am} bg={C.amd}/>}
+                </div>
+                <div style={{position:"absolute",bottom:12,right:14,fontSize:10,color:C.d,letterSpacing:"0.08em"}}>PREVIEW →</div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Scoring legend */}
+      <div style={{maxWidth:960,margin:"0 auto",padding:"0 2rem 40px"}}>
+        <div style={{background:C.s1,border:`1px solid ${C.b1}`,borderRadius:8,padding:"16px 22px",display:"flex",gap:28,flexWrap:"wrap",alignItems:"center"}}>
+          <Lbl>Scoring Logic</Lbl>
+          <span style={{fontSize:12,color:C.d}}>Score = 100 × (1 − age ÷ threshold)</span>
+          <span style={{fontSize:12,color:C.d}}>Author left → −15 penalty</span>
+          {[["green","60–100","HEALTHY"],["amber","30–59","STALE"],["red","0–29","CRITICAL"]].map(([s,range,lbl])=>(
+            <div key={s} style={{display:"flex",alignItems:"center",gap:7}}>
+              <div style={{width:8,height:8,borderRadius:"50%",background:RAG[s].fg}}/>
+              <span style={{fontSize:11,color:RAG[s].fg,fontWeight:700,letterSpacing:"0.08em"}}>{lbl}</span>
+              <span style={{fontSize:11,color:C.d}}>{range}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* API Key */}
+      <div style={{maxWidth:960,margin:"0 auto",padding:"0 2rem 80px"}}>
+        <div style={{background:C.s1,border:`1px solid ${C.b1}`,borderRadius:12,padding:"32px 36px"}}>
+          <Lbl color={C.p}>Step 2 — Connect AI Engine</Lbl>
+          <h3 style={{fontSize:19,fontWeight:700,margin:"10px 0 6px",letterSpacing:"-0.02em"}}>Run Contradiction Detection</h3>
+          <p style={{fontSize:13,color:C.m,margin:"0 0 22px",lineHeight:1.65}}>
+            Sends all {scored.length} documents to Claude for simultaneous analysis. Detects factual contradictions across go-live dates, revenue figures, personnel, and scope — applies the consulting trust hierarchy and generates an executive summary. Your key is sent only to Anthropic.
+          </p>
+          <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
+            <input type="password" value={apiKey} onChange={e=>setApiKey(e.target.value)} onKeyDown={e=>e.key==="Enter"&&onRun()} placeholder="sk-ant-api03-…"
+              style={{flex:"1 1 260px",background:C.s2,border:`1px solid ${C.b2}`,color:C.w,padding:"13px 18px",borderRadius:8,fontSize:14,fontFamily:"monospace",outline:"none"}}/>
+            <button onClick={onRun}
+              style={{background:C.p,color:C.w,border:"none",padding:"13px 32px",borderRadius:8,fontSize:13,fontWeight:700,cursor:"pointer",letterSpacing:"0.08em",textTransform:"uppercase"}}
+              onMouseOver={e=>e.currentTarget.style.opacity="0.85"} onMouseOut={e=>e.currentTarget.style.opacity="1"}>
+              Run Analysis →
+            </button>
+          </div>
+          {error&&<div style={{marginTop:14,color:C.re,fontSize:13}}>⚠ {error}</div>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── SCANNING ────────────────────────────────────────────────────── */
+function Scanning({step}){
+  const pct=Math.round(((step+1)/STEPS.length)*100);
+  return <div style={{background:C.bg,minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",color:C.w,padding:"2rem"}}>
+    <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:60}}>
+      <div style={{width:10,height:10,borderRadius:"50%",background:C.p}}/>
+      <span style={{fontSize:13,fontWeight:700,letterSpacing:"0.1em",textTransform:"uppercase"}}>Knowledge Aging Radar</span>
+    </div>
+    <div style={{width:"100%",maxWidth:500}}>
+      <div style={{textAlign:"center",marginBottom:32}}>
+        <Lbl color={C.p}>Analysis in Progress</Lbl>
+        <div style={{fontSize:21,fontWeight:700,letterSpacing:"-0.025em",marginTop:12}}>Project Orion · GlobalBank PLC</div>
+        <div style={{fontSize:13,color:C.d,marginTop:7}}>{pct}% — {STEPS[step]}</div>
+      </div>
+      <div style={{background:C.s1,height:3,borderRadius:2,marginBottom:36,overflow:"hidden"}}>
+        <div style={{height:"100%",background:`linear-gradient(90deg,${C.p},#7b00cc)`,width:`${pct}%`,transition:"width 0.6s ease",borderRadius:2}}/>
+      </div>
+      <div style={{display:"flex",flexDirection:"column",gap:13}}>
+        {STEPS.map((s,i)=>{const done=i<step,active=i===step; return(
+          <div key={i} style={{display:"flex",alignItems:"center",gap:14,opacity:i>step?0.18:1,transition:"opacity 0.4s"}}>
+            <div style={{width:22,height:22,borderRadius:"50%",flexShrink:0,background:done?C.p:"transparent",border:`2px solid ${done?C.p:active?C.p:C.vd}`,display:"flex",alignItems:"center",justifyContent:"center"}}>
+              {done&&<span style={{fontSize:11,color:"#fff",fontWeight:700}}>✓</span>}
+              {active&&<div style={{width:7,height:7,background:C.p,borderRadius:"50%",animation:"ks-pulse 1.1s ease-in-out infinite"}}/>}
+            </div>
+            <span style={{fontSize:13,color:active?C.w:C.m,fontWeight:active?600:400}}>{s}</span>
+          </div>
+        );})}
+      </div>
+    </div>
+  </div>;
+}
+
+/* ── RESULTS ─────────────────────────────────────────────────────── */
+function Results({results,onBack}){
+  const [tab,setTab]=useState("dashboard");
+  const [exp,setExp]=useState({});
+  const [viewDoc,setViewDoc]=useState(null);
+  const hc=results.overallHealth>=60?C.gr:results.overallHealth>=30?C.am:C.re;
+  const gc=scored.filter(d=>d.rag==="green").length;
+  const ac=scored.filter(d=>d.rag==="amber").length;
+  const rc=scored.filter(d=>d.rag==="red").length;
+  return (
+    <div style={{background:C.bg,minHeight:"100vh",color:C.w}}>
+      {viewDoc&&<DocModal doc={viewDoc} onClose={()=>setViewDoc(null)}/>}
+      <Nav right={<button onClick={onBack} style={{background:"transparent",border:`1px solid ${C.b2}`,color:C.m,padding:"6px 16px",borderRadius:6,fontSize:12,cursor:"pointer"}}>← New Scan</button>}/>
+      <div style={{borderBottom:`1px solid ${C.b1}`,padding:"0 2rem",display:"flex"}}>
+        {["dashboard","documents","contradictions"].map(t=>(
+          <button key={t} onClick={()=>setTab(t)} style={{background:"transparent",border:"none",color:tab===t?C.w:C.d,padding:"16px 20px",fontSize:12,fontWeight:700,cursor:"pointer",letterSpacing:"0.1em",textTransform:"uppercase",borderBottom:`2px solid ${tab===t?C.p:"transparent"}`,marginBottom:-1,transition:"color 0.2s"}}>
+            {t}
+            {t==="contradictions"&&<span style={{marginLeft:7,fontSize:10,background:C.red,color:C.re,padding:"1px 6px",borderRadius:3,fontWeight:800}}>{results.contradictions.length}</span>}
+          </button>
+        ))}
+      </div>
+      <div style={{maxWidth:1060,margin:"0 auto",padding:"40px 2rem 80px"}}>
+
+        {tab==="dashboard"&&<div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(210px,1fr))",gap:12,marginBottom:32}}>
+            {[
+              {lbl:"Overall Health Score",val:results.overallHealth,unit:"/100",col:hc},
+              {lbl:"Documents Scanned",val:scored.length,unit:"docs",col:C.p},
+              {lbl:"Contradictions Found",val:results.contradictions.length,unit:"issues",col:C.am},
+              {lbl:"Critical Issues",val:results.criticalCount,unit:"critical",col:results.criticalCount>0?C.re:C.gr}
+            ].map((k,i)=>(
+              <div key={i} style={{background:C.s1,border:`1px solid ${C.b1}`,borderRadius:8,padding:"22px 20px"}}>
+                <Lbl>{k.lbl}</Lbl>
+                <div style={{display:"flex",alignItems:"baseline",gap:6,marginTop:14}}>
+                  <span style={{fontSize:40,fontWeight:900,color:k.col,letterSpacing:"-0.04em",lineHeight:1}}>{k.val}</span>
+                  <span style={{fontSize:12,color:C.d}}>{k.unit}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div style={{background:C.s1,border:`1px solid ${C.b1}`,borderLeft:`3px solid ${C.p}`,borderRadius:8,padding:"26px 28px",marginBottom:24}}>
+            <Lbl color={C.p}>AI Executive Summary — Programme Director Briefing</Lbl>
+            <p style={{fontSize:15,color:"#cccccc",lineHeight:1.75,margin:"14px 0 0"}}>{results.narrative}</p>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+            <div style={{background:C.s1,border:`1px solid ${C.b1}`,borderRadius:8,padding:"22px 24px"}}>
+              <Lbl>Document Health</Lbl>
+              <div style={{display:"flex",flexDirection:"column",gap:14,marginTop:18}}>
+                {[["green",gc],["amber",ac],["red",rc]].map(([s,n])=>{const r=RAG[s]; return(
+                  <div key={s} style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+                    <div style={{display:"flex",alignItems:"center",gap:10}}><div style={{width:8,height:8,borderRadius:"50%",background:r.fg}}/><Lbl color={r.fg}>{r.lbl}</Lbl></div>
+                    <div style={{display:"flex",alignItems:"center",gap:12}}>
+                      <div style={{width:100,height:4,background:C.s2,borderRadius:2,overflow:"hidden"}}>
+                        <div style={{height:"100%",width:`${(n/scored.length)*100}%`,background:r.fg,borderRadius:2}}/>
+                      </div>
+                      <span style={{fontSize:20,fontWeight:800,color:r.fg,minWidth:20,textAlign:"right"}}>{n}</span>
+                    </div>
+                  </div>
+                );})}
+              </div>
+            </div>
+            <div style={{background:C.s1,border:`1px solid ${C.b1}`,borderRadius:8,padding:"22px 24px"}}>
+              <Lbl>Contradiction Severity</Lbl>
+              <div style={{display:"flex",flexDirection:"column",gap:14,marginTop:18}}>
+                {["CRITICAL","HIGH","MEDIUM"].map(sev=>{const n=results.contradictions.filter(c=>c.severity===sev).length; const sv=SEV[sev]; return(
+                  <div key={sev} style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+                    <Bdg text={sev} fg={sv.fg} bg={sv.bg}/>
+                    <div style={{display:"flex",alignItems:"center",gap:12}}>
+                      <div style={{width:100,height:4,background:C.s2,borderRadius:2,overflow:"hidden"}}>
+                        <div style={{height:"100%",width:results.contradictions.length?`${(n/results.contradictions.length)*100}%`:"0%",background:sv.fg,borderRadius:2}}/>
+                      </div>
+                      <span style={{fontSize:20,fontWeight:800,color:sv.fg,minWidth:20,textAlign:"right"}}>{n}</span>
+                    </div>
+                  </div>
+                );})}
+              </div>
+            </div>
+          </div>
+        </div>}
+
+        {tab==="documents"&&<div style={{overflowX:"auto"}}>
+          <table style={{width:"100%",borderCollapse:"collapse",minWidth:760}}>
+            <thead><tr style={{borderBottom:`1px solid ${C.b1}`}}>
+              {["Document","Type","Author","Age","Freshness","Health","Author Status",""].map(h=><th key={h} style={{padding:"10px 14px",textAlign:"left"}}><Lbl>{h}</Lbl></th>)}
+            </tr></thead>
+            <tbody>{scored.map(doc=>{const r=RAG[doc.rag]; return(
+              <tr key={doc.id} style={{borderBottom:`1px solid ${C.b1}`,transition:"background 0.15s"}}
+                onMouseOver={e=>e.currentTarget.style.background=C.s1} onMouseOut={e=>e.currentTarget.style.background="transparent"}>
+                <td style={{padding:"15px 14px",fontSize:14,fontWeight:700}}>{doc.title}</td>
+                <td style={{padding:"15px 14px"}}><Lbl color={C.d}>{doc.type}</Lbl></td>
+                <td style={{padding:"15px 14px",fontSize:13,color:C.m}}>{doc.author}</td>
+                <td style={{padding:"15px 14px",fontSize:13,color:C.d}}>{doc.daysAgo}d</td>
+                <td style={{padding:"15px 14px"}}>
+                  <div style={{display:"flex",alignItems:"center",gap:8}}>
+                    <div style={{background:C.s2,height:4,width:72,borderRadius:2,overflow:"hidden"}}>
+                      <div style={{height:"100%",width:`${doc.score}%`,background:r.fg,borderRadius:2}}/>
+                    </div>
+                    <span style={{fontSize:13,fontWeight:700,color:r.fg}}>{doc.score}</span>
+                  </div>
+                </td>
+                <td style={{padding:"15px 14px"}}><Bdg text={r.lbl} fg={r.fg} bg={r.bg}/></td>
+                <td style={{padding:"15px 14px"}}>{doc.authorOnProject?<span style={{fontSize:12,color:C.gr}}>● Active</span>:<span style={{fontSize:12,color:C.am}}>⚠ Left</span>}</td>
+                <td style={{padding:"15px 14px"}}>
+                  <button onClick={()=>setViewDoc(doc)} style={{background:"transparent",border:`1px solid ${C.b2}`,color:C.m,padding:"4px 12px",borderRadius:4,fontSize:11,cursor:"pointer",letterSpacing:"0.05em"}}>Preview</button>
+                </td>
+              </tr>
+            );})}
+            </tbody>
+          </table>
+        </div>}
+
+        {tab==="contradictions"&&<div style={{display:"flex",flexDirection:"column",gap:10}}>
+          <div style={{marginBottom:10,display:"flex",alignItems:"center",gap:16}}>
+            <Lbl>{results.contradictions.length} Contradictions · Sorted Critical First</Lbl>
+            <span style={{fontSize:12,color:C.d}}>Click any row to expand</span>
+          </div>
+          {results.contradictions.map((c,i)=>{const sv=SEV[c.severity]||SEV.MEDIUM,open=!!exp[i]; return(
+            <div key={i} style={{background:C.s1,border:`1px solid ${C.b1}`,borderRadius:8,overflow:"hidden"}}>
+              <button onClick={()=>setExp(p=>({...p,[i]:!p[i]}))} style={{width:"100%",background:"transparent",border:"none",padding:"18px 22px",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"space-between",color:C.w,textAlign:"left"}}>
+                <div style={{display:"flex",alignItems:"center",gap:14}}>
+                  <Bdg text={c.severity} fg={sv.fg} bg={sv.bg}/>
+                  <span style={{fontSize:15,fontWeight:700,letterSpacing:"-0.015em"}}>{c.topic}</span>
+                </div>
+                <span style={{color:C.d,fontSize:18,flexShrink:0,marginLeft:12}}>{open?"▲":"▼"}</span>
+              </button>
+              {open&&<div style={{padding:"0 22px 22px",borderTop:`1px solid ${C.b1}`}}>
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginTop:18,marginBottom:14}}>
+                  {[c.claimA,c.claimB].map((cl,j)=>(
+                    <div key={j} style={{background:C.s2,border:`1px solid ${C.b1}`,borderRadius:6,padding:"14px 16px"}}>
+                      <Lbl>{cl.document}</Lbl>
+                      <div style={{fontSize:11,color:C.d,marginTop:3,marginBottom:10}}>{cl.age}</div>
+                      <p style={{fontSize:14,color:"#ddd",lineHeight:1.55,margin:0}}>"{cl.claim}"</p>
+                    </div>
+                  ))}
+                </div>
+                <div style={{background:C.pd,border:`1px solid ${C.pb}`,borderRadius:6,padding:"14px 16px",marginBottom:10}}>
+                  <Lbl color={C.p}>Trust Recommendation</Lbl>
+                  <div style={{fontSize:14,fontWeight:700,margin:"8px 0 5px"}}>→ {c.trustedDocument}</div>
+                  <div style={{fontSize:13,color:C.m,lineHeight:1.55}}>{c.trustReason}</div>
+                </div>
+                <div style={{background:C.s2,border:`1px solid ${C.b1}`,borderRadius:6,padding:"14px 16px"}}>
+                  <Lbl>Recommended Fix</Lbl>
+                  <p style={{fontSize:13,color:"#bbb",lineHeight:1.6,margin:"8px 0 0"}}>{c.recommendedFix}</p>
+                </div>
+              </div>}
+            </div>
+          );})}
+        </div>}
+      </div>
+    </div>
+  );
+}
+
+/* ── APP ROOT ─────────────────────────────────────────────────────── */
+function App(){
+  const [screen,setScreen]=useState("landing");
+  const [apiKey,setApiKey]=useState("");
+  const [step,setStep]=useState(0);
+  const [results,setResults]=useState(null);
+  const [error,setError]=useState(null);
+
+  async function run(){
+    if(!apiKey.trim()){setError("Please enter your Anthropic API key.");return;}
+    setError(null);setScreen("scanning");setStep(0);
+    try{
+      for(let i=0;i<3;i++){setStep(i);await new Promise(r=>setTimeout(r,550));}
+      setStep(3);
+      const contradictions=await getContradictions(apiKey);
+      setStep(4);await new Promise(r=>setTimeout(r,400));
+      setStep(5);
+      const narrative=await getNarrative(apiKey,contradictions);
+      setStep(6);await new Promise(r=>setTimeout(r,500));
+      const sorted=[...contradictions].sort((a,b)=>({CRITICAL:0,HIGH:1,MEDIUM:2}[a.severity]??3)-({CRITICAL:0,HIGH:1,MEDIUM:2}[b.severity]??3));
+      const avg=Math.round(scored.reduce((s,d)=>s+d.score,0)/scored.length);
+      setResults({contradictions:sorted,narrative,overallHealth:avg,criticalCount:sorted.filter(c=>c.severity==="CRITICAL").length});
+      setScreen("results");
+    }catch(err){setError(`Analysis failed: ${err.message}`);setScreen("landing");}
+  }
+
+  if(screen==="scanning") return <Scanning step={step}/>;
+  if(screen==="results"&&results) return <Results results={results} onBack={()=>setScreen("landing")}/>;
+  return <Landing apiKey={apiKey} setApiKey={setApiKey} onRun={run} error={error}/>;
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
